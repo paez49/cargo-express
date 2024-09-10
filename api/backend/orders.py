@@ -1,10 +1,7 @@
 import os
 
 import boto3
-from flask import Flask, jsonify, make_response, request
-
-app = Flask(__name__)
-
+from flask import Blueprint, jsonify, request
 
 dynamodb_client = boto3.client("dynamodb")
 
@@ -13,11 +10,12 @@ if os.environ.get("IS_OFFLINE"):
         "dynamodb", region_name="localhost", endpoint_url="http://localhost:8000"
     )
 
+order_bp = Blueprint("order", __name__)
 
 ORDERS_TABLE = os.environ["ORDERS_TABLE"]
 
 
-@app.route("/registrar_pedido_entregado", methods=["POST"])
+@order_bp.route("/order/registrar_pedido_entregado", methods=["POST"])
 def create_order():
     order_id = request.json.get("pedido_id")
     delivery = request.json.get("repartidor")
@@ -58,24 +56,17 @@ def create_order():
     return jsonify({"oder_id": order_id, "timestamp": timestamp})
 
 
-@app.route("/consultar_pedido/<order_id>", methods=["GET"])
+"""@order_bp.route("/order/consultar_pedido/<order_id>", methods=["GET"])
 def get_order(order_id):
-    table = dynamodb_client.Table(ORDERS_TABLE)
-    try:
-        response = table.get_item(Key={"order_id": order_id})
-        item = response.get("Item")
-        if item:
-            # Convert price fields back to float if necessary
-            for product in item.get("products", []):
-                product["precio"] = float(product["precio"])
-            item["total"] = float(item["total"])
-            return jsonify(item)
-        else:
-            return jsonify({"error": "Order not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+   
+    response = dynamodb_client.get_item(TableName=ORDERS_TABLE, Key={"order_id": {"S": order_id}})
+    item = response.get("Item")
+    if item:
+        # Convert price fields back to float if necessary
+        for product in item.get("products", []):
+            product["precio"] = float(product["precio"])
+        item["total"] = float(item["total"])
+        return jsonify(item)
+    else:
+        return jsonify({"error": "Order not found"}), 404"""
 
-
-@app.errorhandler(404)
-def resource_not_found(e):
-    return make_response(jsonify(error="Not found!"), 404)

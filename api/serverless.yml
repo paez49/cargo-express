@@ -1,7 +1,7 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
 org: lanea
 # "service" is the name of this project. This will also be added to your AWS resource names.
-service: backend
+service: api
 
 stages:
   default:
@@ -43,16 +43,24 @@ provider:
     ORDERS_TABLE: ${param:tableName}
 
 functions:
-  api:
+  orders-api:
     handler: wsgi_handler.handler
     events:
       - http:
-          path: /
+          path: /order/
           method: ANY
       - http:
-          path: /{proxy+}
+          path: /order/{proxy+}
           method: ANY
-
+  monitor-api:
+    handler: wsgi_handler.handler
+    events:
+      - http:
+          path: /monitor/
+          method: ANY
+      - http:
+          path: /monitor/{proxy+}
+          method: ANY
 resources:
   Resources:
     OrdersTable:

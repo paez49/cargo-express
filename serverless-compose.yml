@@ -1,6 +1,0 @@
-services:
-  backend:
-    path: backend
-  monitor:
-    path: monitor
-    dependsOn: backend
