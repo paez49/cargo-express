@@ -102,7 +102,7 @@ repartidores = [
 ]
 
 def registrar_pedido_entregado(pedido_id, repartidor, productos):
-    url = "https://api-endpont.com/registrar_pedido_entregado"
+    url = "http://localhost:5000/registrar_pedido_entregado"
     payload = {
         "pedido_id": pedido_id,
         "repartidor": repartidor,
