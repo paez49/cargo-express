@@ -3,7 +3,9 @@ service: api
 stages:
   default:
     params:
-      tableName: "orders-table-${sls:stage}"
+      ordersTableName: "orders-table-${sls:stage}"
+      productsTableName: "products-table-${sls:stage}"
+      deliveriesTableName: "deliveries-table-${sls:stage}"
 package:
   exclude:
     - node_modules/**
@@ -37,6 +39,8 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - Fn::GetAtt: [OrdersTable, Arn]
+            - Fn::GetAtt: [ProductsTable, Arn]
+            - Fn::GetAtt: [DeliveriesTable, Arn]
   httpApi:
     authorizers:
       someJwtAuthorizer:
@@ -48,7 +52,9 @@ provider:
           - !GetAtt AppClient.ClientId
 
   environment:
-    ORDERS_TABLE: ${param:tableName}
+    ORDERS_TABLE: ${param:ordersTableName}
+    PRODUCTS_TABLE: ${param:productsTableName}
+    DELIVERIES_TABLE: ${param:deliveriesTableName}
 
 functions:
   orders-api:
@@ -64,6 +70,7 @@ functions:
           method: ANY
           authorizer:
             name: someJwtAuthorizer
+      
   monitor-api:
     handler: wsgi_handler.handler
     events:
@@ -78,6 +85,13 @@ functions:
           authorizer:
             name: someJwtAuthorizer
 
+  streamFunction:
+      handler: monitor.streamFunction.handler
+      events:
+        - stream: 
+            type: dynamodb
+            arn:
+              !GetAtt OrdersTable.StreamArn
 resources:
   Resources:
     OrdersTable:
@@ -92,7 +106,36 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${param:tableName}
+        TableName: ${param:ordersTableName}
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE 
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: product_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: product_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${param:productsTableName}
+    DeliveriesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: delivery_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: delivery_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${param:deliveriesTableName}
+
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
       Properties:
@@ -107,6 +150,7 @@ resources:
         Policies:
           PasswordPolicy:
             MinimumLength: 6
+
     AppClient:
       Type: AWS::Cognito::UserPoolClient
       Properties:
@@ -124,6 +168,7 @@ resources:
         UserPoolId: !GetAtt CognitoUserPool.UserPoolId
         SupportedIdentityProviders:
           - COGNITO
+
     HostedUI:
       Type: AWS::Cognito::UserPoolDomain
       Properties:
@@ -132,6 +177,7 @@ resources:
           - - ${self:service}-${sls:stage}
             - !Ref AppClient
         UserPoolId: !GetAtt CognitoUserPool.UserPoolId
+
   Outputs:
     SignupURL:
       Value: !Sub https://${HostedUI}.auth.${aws:region}.amazoncognito.com/login?client_id=${AppClient}&response_type=token&scope=email+profile&redirect_uri=https://${self:service}-${sls:stage}.execute-api.${aws:region}.amazonaws.com

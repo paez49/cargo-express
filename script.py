@@ -7,7 +7,10 @@ import time
 import boto3
 
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
+import time
 
 productos = [
     {"IdProducto": "pk0001", "producto": "Moneda", "precio": 1.00},
@@ -51,6 +54,7 @@ def get_status():
 
 
 def registrar_pedido_entregado(pedido_id, repartidor, productos):
+
     url = f"{order_api}/registrar_pedido_entregado"
     payload = {
         "pedido_id": pedido_id,
@@ -71,9 +75,12 @@ def registrar_pedido_entregado(pedido_id, repartidor, productos):
         print("### Error al registrar el pedido entregado")
 
 
-order_api = os.environ["ORDER_API"]
-monitor_api = os.environ["MONITOR_API"]
-client_id = os.environ["CLIENT_ID"]
+api_url = os.getenv("API")
+client_id = os.getenv("CLIENT_ID")
+
+order_api = api_url + "/order"
+monitor_api = api_url + "/monitor"
+
 
 # TODO: Update credentials when testing
 user = "test"
@@ -93,6 +100,10 @@ while True:
     pedido_id = str(uuid.uuid4())
     repartidor = random.choice(repartidores)
     productos = random.choices(productos, k=random.randint(1, 10))
-    get_status()
+    
+    start_time = time.time()
     registrar_pedido_entregado(pedido_id, repartidor, productos)
+    end_time = time.time()
+    
+    print(f"Execution time: {end_time - start_time}")
     time.sleep(5)

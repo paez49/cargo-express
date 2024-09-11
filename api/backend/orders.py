@@ -27,10 +27,10 @@ def create_order():
         total += product["precio"]
 
     delivery_to_save = {
-        "name": {"S": delivery["Nombre"]},  # Nombre como un string
+        "name": {"S": delivery["Nombre"]}, 
         "delivery_id": {
             "N": str(delivery["IdRepartidor"])
-        },  # IdRepartidor como un número
+        }, 
     }
     item = {
         "order_id": {"S": order_id},
@@ -54,19 +54,4 @@ def create_order():
     dynamodb_client.put_item(TableName=ORDERS_TABLE, Item=item)
 
     return jsonify({"oder_id": order_id, "timestamp": timestamp})
-
-
-"""@order_bp.route("/order/consultar_pedido/<order_id>", methods=["GET"])
-def get_order(order_id):
-   
-    response = dynamodb_client.get_item(TableName=ORDERS_TABLE, Key={"order_id": {"S": order_id}})
-    item = response.get("Item")
-    if item:
-        # Convert price fields back to float if necessary
-        for product in item.get("products", []):
-            product["precio"] = float(product["precio"])
-        item["total"] = float(item["total"])
-        return jsonify(item)
-    else:
-        return jsonify({"error": "Order not found"}), 404"""
 

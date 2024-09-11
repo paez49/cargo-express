@@ -4,3 +4,4 @@
 **/.serverless
 **/.dynamodb
 **/.env
+venv/
