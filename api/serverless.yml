@@ -1,6 +1,3 @@
-# "org" ensures this Service is used with the correct Serverless Framework Access Key.
-org: lanea
-# "service" is the name of this project. This will also be added to your AWS resource names.
 service: api
 
 stages:
@@ -39,26 +36,42 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - Fn::GetAtt: [OrdersTable, Arn]
+  httpApi:
+    authorizers:
+      someJwtAuthorizer:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: !Sub https://cognito-idp.${aws:region}.amazonaws.com/${CognitoUserPool.UserPoolId}
+
+        audience:
+          - ${client1Id}
+          - ${client2Id}
+
   environment:
     ORDERS_TABLE: ${param:tableName}
+    
 
 functions:
   orders-api:
     handler: wsgi_handler.handler
     events:
-      - http:
-          path: /order/
+      - httpApi:
+          path: /order
           method: ANY
-      - http:
+          authorizer: 
+            name: someJwtAuthorizer
+      - httpApi:
           path: /order/{proxy+}
           method: ANY
+          authorizer: 
+            name: someJwtAuthorizer
   monitor-api:
     handler: wsgi_handler.handler
     events:
-      - http:
-          path: /monitor/
+      - httpApi:
+          path: /monitor
           method: ANY
-      - http:
+      - httpApi:
           path: /monitor/{proxy+}
           method: ANY
 resources:
@@ -76,3 +89,46 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: ${param:tableName}
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:service}-${sls:stage}-UserPool
+        Schema:
+          - Name: email
+            AttributeDataType: String
+            Mutable: true
+            Required: true
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+    AppClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        AllowedOAuthFlows:
+          - implicit
+        AllowedOAuthScopes:
+          - aws.cognito.signin.user.admin
+          - email
+          - openid
+          - profile
+        AllowedOAuthFlowsUserPoolClient: true
+        ClientName: ${self:service}-${sls:stage}-UserPoolClient
+        CallbackURLs:
+          - !Sub https://${self:service}-${sls:stage}.execute-api.${aws:region}.amazonaws.com
+        ExplicitAuthFlows:
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+        UserPoolId: !Sub ${CognitoUserPool.UserPoolId}
+        SupportedIdentityProviders:
+          - COGNITO
+    HostedUI:
+      Type: AWS::Cognito::UserPoolDomain
+      Properties: 
+        Domain: !Join
+          - '-'
+          - -  ${self:service}-${sls:stage}
+            - !Ref AppClient
+        UserPoolId: !Sub ${CognitoUserPool.UserPoolId}
+  Outputs:
+    SignupURL: 
+      Value: !Sub https://${HostedUI}.auth.${aws:region}.amazoncognito.com/login?client_id=${AppClient}&response_type=token&scope=email+profile&redirect_uri=https://${self:service}-${sls:stage}.execute-api.${aws:region}.amazonaws.com
