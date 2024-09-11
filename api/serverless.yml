@@ -1,0 +1,137 @@
+service: api
+
+stages:
+  default:
+    params:
+      tableName: "orders-table-${sls:stage}"
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
+    - __pycache__/**
+    - .env
+    - .dynamodb/**
+
+plugins:
+  - serverless-wsgi
+  - serverless-python-requirements
+  - serverless-dynamodb
+  - serverless-offline
+custom:
+  wsgi:
+    app: app.app
+
+provider:
+  name: aws
+  runtime: python3.12
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [OrdersTable, Arn]
+  httpApi:
+    authorizers:
+      someJwtAuthorizer:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: !Sub https://cognito-idp.${aws:region}.amazonaws.com/${CognitoUserPool.UserPoolId}
+
+        audience:
+          - !GetAtt AppClient.ClientId
+
+  environment:
+    ORDERS_TABLE: ${param:tableName}
+
+functions:
+  orders-api:
+    handler: wsgi_handler.handler
+    events:
+      - httpApi:
+          path: /order
+          method: ANY
+          authorizer:
+            name: someJwtAuthorizer
+      - httpApi:
+          path: /order/{proxy+}
+          method: ANY
+          authorizer:
+            name: someJwtAuthorizer
+  monitor-api:
+    handler: wsgi_handler.handler
+    events:
+      - httpApi:
+          path: /monitor
+          method: ANY
+          authorizer:
+            name: someJwtAuthorizer
+      - httpApi:
+          path: /monitor/{proxy+}
+          method: ANY
+          authorizer:
+            name: someJwtAuthorizer
+
+resources:
+  Resources:
+    OrdersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: order_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: order_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${param:tableName}
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:service}-${sls:stage}-UserPool
+        AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: false
+        Schema:
+          - Name: email
+            AttributeDataType: String
+            Mutable: true
+            Required: true
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+    AppClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        AllowedOAuthFlows:
+          - implicit
+        AllowedOAuthScopes:
+          - openid
+        AllowedOAuthFlowsUserPoolClient: true
+        ClientName: ${self:service}-${sls:stage}-UserPoolClient
+        CallbackURLs:
+          - !Sub https://${self:service}-${sls:stage}.execute-api.${aws:region}.amazonaws.com
+        ExplicitAuthFlows:
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+        UserPoolId: !GetAtt CognitoUserPool.UserPoolId
+        SupportedIdentityProviders:
+          - COGNITO
+    HostedUI:
+      Type: AWS::Cognito::UserPoolDomain
+      Properties:
+        Domain: !Join
+          - "-"
+          - - ${self:service}-${sls:stage}
+            - !Ref AppClient
+        UserPoolId: !GetAtt CognitoUserPool.UserPoolId
+  Outputs:
+    SignupURL:
+      Value: !Sub https://${HostedUI}.auth.${aws:region}.amazoncognito.com/login?client_id=${AppClient}&response_type=token&scope=email+profile&redirect_uri=https://${self:service}-${sls:stage}.execute-api.${aws:region}.amazonaws.com
