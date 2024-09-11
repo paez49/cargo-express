@@ -10,7 +10,8 @@ package:
     - venv/**
     - __pycache__/**
     - .env
-    
+    - .dynamodb/**
+
 plugins:
   - serverless-wsgi
   - serverless-python-requirements
@@ -44,12 +45,10 @@ provider:
         issuerUrl: !Sub https://cognito-idp.${aws:region}.amazonaws.com/${CognitoUserPool.UserPoolId}
 
         audience:
-          - ${client1Id}
-          - ${client2Id}
+          - !GetAtt AppClient.ClientId
 
   environment:
     ORDERS_TABLE: ${param:tableName}
-    
 
 functions:
   orders-api:
@@ -58,12 +57,12 @@ functions:
       - httpApi:
           path: /order
           method: ANY
-          authorizer: 
+          authorizer:
             name: someJwtAuthorizer
       - httpApi:
           path: /order/{proxy+}
           method: ANY
-          authorizer: 
+          authorizer:
             name: someJwtAuthorizer
   monitor-api:
     handler: wsgi_handler.handler
@@ -71,9 +70,14 @@ functions:
       - httpApi:
           path: /monitor
           method: ANY
+          authorizer:
+            name: someJwtAuthorizer
       - httpApi:
           path: /monitor/{proxy+}
           method: ANY
+          authorizer:
+            name: someJwtAuthorizer
+
 resources:
   Resources:
     OrdersTable:
@@ -93,6 +97,8 @@ resources:
       Type: AWS::Cognito::UserPool
       Properties:
         UserPoolName: ${self:service}-${sls:stage}-UserPool
+        AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: false
         Schema:
           - Name: email
             AttributeDataType: String
@@ -107,10 +113,7 @@ resources:
         AllowedOAuthFlows:
           - implicit
         AllowedOAuthScopes:
-          - aws.cognito.signin.user.admin
-          - email
           - openid
-          - profile
         AllowedOAuthFlowsUserPoolClient: true
         ClientName: ${self:service}-${sls:stage}-UserPoolClient
         CallbackURLs:
@@ -118,17 +121,17 @@ resources:
         ExplicitAuthFlows:
           - ALLOW_USER_PASSWORD_AUTH
           - ALLOW_REFRESH_TOKEN_AUTH
-        UserPoolId: !Sub ${CognitoUserPool.UserPoolId}
+        UserPoolId: !GetAtt CognitoUserPool.UserPoolId
         SupportedIdentityProviders:
           - COGNITO
     HostedUI:
       Type: AWS::Cognito::UserPoolDomain
-      Properties: 
+      Properties:
         Domain: !Join
-          - '-'
-          - -  ${self:service}-${sls:stage}
+          - "-"
+          - - ${self:service}-${sls:stage}
             - !Ref AppClient
-        UserPoolId: !Sub ${CognitoUserPool.UserPoolId}
+        UserPoolId: !GetAtt CognitoUserPool.UserPoolId
   Outputs:
-    SignupURL: 
+    SignupURL:
       Value: !Sub https://${HostedUI}.auth.${aws:region}.amazoncognito.com/login?client_id=${AppClient}&response_type=token&scope=email+profile&redirect_uri=https://${self:service}-${sls:stage}.execute-api.${aws:region}.amazonaws.com
