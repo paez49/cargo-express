@@ -7,7 +7,10 @@ import time
 import boto3
 
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
+import time
 
 productos = [
     {"IdProducto": "pk0001", "producto": "Moneda", "precio": 1.00},
@@ -46,11 +49,14 @@ def get_status():
 
     if response.status_code == 200:
         print(response.json())
+    elif response.status_code == 404:
+        print("### No hay pedidos registrados")
     else:
-        print("### Error al obtener el estado de los repartidores")
+        print("### Error al obtener el estado")
 
 
 def registrar_pedido_entregado(pedido_id, repartidor, productos):
+
     url = f"{order_api}/registrar_pedido_entregado"
     payload = {
         "pedido_id": pedido_id,
@@ -68,16 +74,19 @@ def registrar_pedido_entregado(pedido_id, repartidor, productos):
         print(json.dumps(payload, indent=2, ensure_ascii=False))
         print("### Pedido entregado, registrado exitosamente")
     else:
-        print("### Error al registrar el pedido entregado")
+        print(f"### Error al registrar el pedido entregado {response}")
 
 
-order_api = os.environ["ORDER_API"]
-monitor_api = os.environ["MONITOR_API"]
-client_id = os.environ["CLIENT_ID"]
+api_url = os.getenv("API")
+client_id = os.getenv("CLIENT_ID")
+
+order_api = api_url + "/order"
+monitor_api = api_url + "/monitor"
+
 
 # TODO: Update credentials when testing
 user = "test"
-password = "mazioo"
+password = "maziooo"
 
 client = boto3.client("cognito-idp")
 response = client.initiate_auth(
@@ -88,11 +97,16 @@ response = client.initiate_auth(
 access_token = response["AuthenticationResult"]["AccessToken"]
 print(f"Access Token: {access_token}")
 
-
-while True:
+i = 0
+while i < 3:
     pedido_id = str(uuid.uuid4())
     repartidor = random.choice(repartidores)
     productos = random.choices(productos, k=random.randint(1, 10))
-    get_status()
+    
+    start_time = time.time()
     registrar_pedido_entregado(pedido_id, repartidor, productos)
+    end_time = time.time()
+    print(f"Execution time: {end_time - start_time}")
     time.sleep(5)
+    i+=1
+    #get_status()

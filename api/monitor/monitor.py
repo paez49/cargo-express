@@ -2,8 +2,7 @@ import os
 
 import boto3
 from flask import Blueprint, jsonify, make_response, request
-from collections import Counter
-from datetime import datetime
+from typing import Dict
 
 dynamodb_client = boto3.client("dynamodb")
 
@@ -14,47 +13,27 @@ if os.environ.get("IS_OFFLINE"):
 
 monitor_bp = Blueprint("monitor", __name__)
 
-ORDERS_TABLE = os.environ["ORDERS_TABLE"] 
+PRODUCTS_TABLE = os.environ["PRODUCTS_TABLE"]
+DELIVERIES_TABLE = os.environ["DELIVERIES_TABLE"]
 
 
-@monitor_bp.route("/monitor/status", methods=["GET"]) 
-def get_data():
-    product_count = Counter()
-    delivery_date_count = Counter()
-    delivery_count_product = Counter()
+@monitor_bp.route("/monitor/status", methods=["GET"])
+def get_data() -> Dict[str, Dict[str, str]]:
+    """Get the status of the products and deliveries.
 
-    response = dynamodb_client.scan(TableName=ORDERS_TABLE) 
+    Returns:
+        Dict[str,Dict[str,str]]: Product sales and delivery performance.
+    """
+    response_products = dynamodb_client.scan(TableName=PRODUCTS_TABLE)
+    response_deliveries = dynamodb_client.scan(TableName=DELIVERIES_TABLE)
 
-    items = response['Items']
+    items_products = response_products["Items"]
+    items_deliveries = response_deliveries["Items"]
     status_dict = {}
-    if items:
-        for item in items:
-            products = item["products"]
-            for product in products["L"]:
-                product_data = product["M"]
-                product_name = product_data["nombre"]["S"]
-                product_count[product_name] += 1
-            top_products = product_count.most_common(3)
-            
-            
-            delivery_id = item['delivery']["M"]['delivery_id']['N']
-            timestamp = item['timestamp']['S']
-            hour = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f').hour
-            delivery_id_date = f"Delivery with id {delivery_id} deliver an order at {hour}"
-            delivery_date_count[delivery_id_date] += 1
-        
-            delivery_id = item['delivery']["M"]['delivery_id']['N']
-            products = item['products']['L']
-            num_products = len(products)
-            delivery_count_product[delivery_id] += num_products
-            
-            deliveries_with_more_products = sorted(delivery_count_product.items(), key=lambda x: x[1], reverse=True)[:3]
-            
-        status_dict["top_products"] = top_products
-        status_dict["delivery_date_count"] = delivery_date_count
-        status_dict["deliveries_with_more_products"] = deliveries_with_more_products
 
-        
+    if items_products or items_deliveries:
+        status_dict["products_sales"] = items_products
+        status_dict["delivery_performance"] = items_deliveries
         return jsonify(status_dict)
     else:
         return jsonify({"error": "No orders registered"}), 404
