@@ -54,4 +54,3 @@ def create_order():
     dynamodb_client.put_item(TableName=ORDERS_TABLE, Item=item)
 
     return jsonify({"oder_id": order_id, "timestamp": timestamp})
-

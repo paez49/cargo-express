@@ -11,23 +11,26 @@ dynamodb_client = boto3.client("dynamodb")
 def handler(event, context):
 
     updated_data = event["Records"]
+    print(updated_data)
     for key in updated_data:
-        data = key["dynamodb"]["NewImage"]
-        delivery = data["delivery"]["M"]
-        products = data["products"]["L"]
-        timestamp = data["timestamp"]["S"]
-        post_products(products)
-        post_delivery(delivery, len(products), timestamp)
+        if key["eventName"] == "INSERT":
+            data = key["dynamodb"]["NewImage"]
+            delivery = data["delivery"]["M"]
+            products = data["products"]["L"]
+            total = data["total"]["N"]
+            post_products(products)
+            post_delivery(delivery, len(products), float(total))
 
 
-def post_delivery(delivery, n_products, date):
+def post_delivery(delivery, n_products, total):
     delivery_id = delivery["delivery_id"]["N"]
     delivery_name = delivery["name"]["S"]
 
     response = dynamodb_client.get_item(
         TableName=DELIVERIES_TABLE, Key={"delivery_id": {"S": delivery_id}}
     )
-
+    print("### Response delivery")
+    print(json.dumps(response))
     if "Item" not in response:
         # If the delivery does not exist, add it to the DELIVERIES_TABLE
         dynamodb_client.put_item(
@@ -36,26 +39,31 @@ def post_delivery(delivery, n_products, date):
                 "delivery_id": {"S": delivery_id},
                 "name": {"S": delivery_name},
                 "delivered_products": {"N": str(n_products)},
-                "timestamp": {"S": date},
+                "total_money": {"N": str(total)},
             },
         )
 
     else:
         print(json.dumps(response))
         existing_deliveries = int(response["Item"]["delivered_products"]["N"])
+        total_res = float(response["Item"]["total_money"]["N"])
         new_deliveries = existing_deliveries + n_products
-
+        new_total = total + total_res
+        print(new_total)
         dynamodb_client.update_item(
             TableName=DELIVERIES_TABLE,
             Key={"delivery_id": {"S": delivery_id}},
-            UpdateExpression="SET delivered_products = :delivered_products",
+            UpdateExpression="SET delivered_products = :delivered_products, total_money = :new_total",
             ExpressionAttributeValues={
-                ":delivered_products": {"N": str(new_deliveries)}
+                ":delivered_products": {"N": str(new_deliveries)},
+                ":new_total": {"N": str(new_total)},
             },
         )
 
 
 def post_products(products):
+    print("### Products")
+    print(products)
     for product in products:
         product_id = product["M"]["id"]["S"]
         product_name = product["M"]["nombre"]["S"]
@@ -63,8 +71,9 @@ def post_products(products):
         response = dynamodb_client.get_item(
             TableName=PRODUCTS_TABLE, Key={"product_id": {"S": product_id}}
         )
-
-        if "Item" not in response:
+        print("### Response products")
+        print(json.dumps(response))
+        if not response.get("Item"):
             # If the product does not exist, add it to the PRODUCTS_TABLE
             dynamodb_client.put_item(
                 TableName=PRODUCTS_TABLE,
@@ -76,7 +85,7 @@ def post_products(products):
             )
 
         else:
-            print(json.dumps(response))
+
             existing_quantity = int(response["Item"]["quantity"]["N"])
             new_quantity = existing_quantity + 1
 
