@@ -2,6 +2,7 @@ import os
 
 import boto3
 from flask import Blueprint, jsonify, request
+from typing import Dict
 
 dynamodb_client = boto3.client("dynamodb")
 
@@ -16,7 +17,12 @@ ORDERS_TABLE = os.environ["ORDERS_TABLE"]
 
 
 @order_bp.route("/order/registrar_pedido_entregado", methods=["POST"])
-def create_order():
+def create_order() -> Dict[str, str]:
+    """Create a new order in the database.
+
+    Returns:
+        Dict[str,str]: The order_id and timestamp of the created order.
+    """
     order_id = request.json.get("pedido_id")
     delivery = request.json.get("repartidor")
     products = request.json.get("productos")
@@ -27,10 +33,8 @@ def create_order():
         total += product["precio"]
 
     delivery_to_save = {
-        "name": {"S": delivery["Nombre"]}, 
-        "delivery_id": {
-            "N": str(delivery["IdRepartidor"])
-        }, 
+        "name": {"S": delivery["Nombre"]},
+        "delivery_id": {"N": str(delivery["IdRepartidor"])},
     }
     item = {
         "order_id": {"S": order_id},

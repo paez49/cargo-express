@@ -2,7 +2,7 @@ import os
 
 import boto3
 from flask import Blueprint, jsonify, make_response, request
-from collections import Counter
+from typing import Dict
 
 dynamodb_client = boto3.client("dynamodb")
 
@@ -18,8 +18,12 @@ DELIVERIES_TABLE = os.environ["DELIVERIES_TABLE"]
 
 
 @monitor_bp.route("/monitor/status", methods=["GET"])
-def get_data():
+def get_data() -> Dict[str, Dict[str, str]]:
+    """Get the status of the products and deliveries.
 
+    Returns:
+        Dict[str,Dict[str,str]]: Product sales and delivery performance.
+    """
     response_products = dynamodb_client.scan(TableName=PRODUCTS_TABLE)
     response_deliveries = dynamodb_client.scan(TableName=DELIVERIES_TABLE)
 
