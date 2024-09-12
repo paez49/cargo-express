@@ -85,8 +85,8 @@ functions:
           authorizer:
             name: someJwtAuthorizer
 
-  streamFunction:
-      handler: monitor.streamFunction.handler
+  stream_function:
+      handler: monitor.stream_function.handler
       events:
         - stream: 
             type: dynamodb
