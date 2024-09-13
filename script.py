@@ -109,4 +109,4 @@ while i < 3:
     print(f"Execution time: {end_time - start_time}")
     time.sleep(5)
     i+=1
-    #get_status()
+get_status()
