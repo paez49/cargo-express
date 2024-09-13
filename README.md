@@ -74,8 +74,9 @@ sls deploy
 ``` 
 > [!WARNING]
 > Recuerda tener instalado pip y python 3.12 si te llegar a salir un error como este "`python3.12 -m pip help install Exited with code 1`"
+
 > [!INFO]
-> > Lastimosamente en las ultimas versiones de serverless framework está pidiendo loguearse en la pagina de ellos una vez que se quiere desplegar la arquitectura, por lo tanto es necesario crearse una cuenta en esta plataforma para poder ver en ejecución la arquitectura.
+> Lastimosamente en la versión 4 de serverless framework está pidiendo loguearse en la pagina de ellos una vez que se quiere desplegar la arquitectura, por lo tanto es necesario crearse una cuenta en esta plataforma para poder ver en ejecución la arquitectura, o  [ejecutarlo en la versión 3](https://www.serverless.com/framework/docs/getting-started#pinning-to-a-specific-version).
 
 > Para poder desplegar la arquitectura es necesario [tener funcional el CLI de AWS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), así como de 
 [tener configuradas las credenciales de tu cuenta en AWS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html), recomiendo usar la opción de "Short-term credentials"
@@ -109,33 +110,33 @@ Usando el archivo `script.py` se puede usar para realizar las respectivas prueba
 
 <img src="image/CreateUserInfo.png" alt="Descripción del SVG" width="600px">
 
- 4. Una vez creado, ve a la pestaña de AppIntegration
+4. Una vez creado, ve a la pestaña de AppIntegration
 
 
- ![alt text](image/AppIntegrationTab.png)
+![alt text](image/AppIntegrationTab.png)
 
- 5. Baja hasta App client list y oprime en el nombre del app client
+5. Baja hasta App client list y oprime en el nombre del app client
 
- ![alt text](image/AppClient.png)
+![alt text](image/AppClient.png)
 
- 6. Baja hasta la opción de Hosted UI y oprime en View Hosted UI
+6. Baja hasta la opción de Hosted UI y oprime en View Hosted UI
 
- ![alt text](image/HostedUI.png)
+![alt text](image/HostedUI.png)
 
- 7. Una vez acá escribe tu usuario y contraseña que escribiste en el paso 3, te pedirá que ingreses una nueva contraseña y un correo, el correo no es necesario que sea real.
- 8. Probablemente te salga un error en el navegador, sin embargo se confirma que el usuario cambió su contraseña correctamente.
+7. Una vez acá escribe tu usuario y contraseña que escribiste en el paso 3, te pedirá que ingreses una nueva contraseña y un correo, el correo no es necesario que sea real.
+8. Probablemente te salga un error en el navegador, sin embargo se confirma que el usuario cambió su contraseña correctamente.
 
- 9. Ve a la carpeta raiz del proyecto y crea un archivo `.env` con la siguiente estructura
+9. Ve a la carpeta raiz del proyecto y crea un archivo `.env` con la siguiente estructura
 
- ![alt text](image/DOTENV.png)
+![alt text](image/DOTENV.png)
 
- 10. En la variable `API` pon la URL raíz que te salió una vez desplegada la arquitectura.
+10. En la variable `API` pon la URL raíz que te salió una vez desplegada la arquitectura.
 
- 11. En la variable `CLIENT_ID` pon el id del app client **entre comillas**, este se encuentra en la interfaz vista en el paso 5.
+11. En la variable `CLIENT_ID` pon el id del app client **entre comillas**, este se encuentra en la interfaz vista en el paso 5.
 
- ![alt text](image/AppClientID.png)
+![alt text](image/AppClientID.png)
 
- 12. Una vez copiados y pegados se debería ver asi
+12. Una vez copiados y pegados se debería ver asi
 
 ![alt text](image/ApiClientIdEnv.png)
 

@@ -85,8 +85,8 @@ monitor_api = api_url + "/monitor"
 
 
 # TODO: Update credentials when testing
-user = "test"
-password = "maziooo"
+user = ""
+password = ""
 
 client = boto3.client("cognito-idp")
 response = client.initiate_auth(
