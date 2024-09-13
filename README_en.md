@@ -69,7 +69,7 @@ Once all the dependencies are downloaded, run the following command to deploy th
 sls deploy
 ``` 
 > [!WARNING]
-> Remember to have pip and python 3.12 installed if you get an error like this ```python3.12 -m pip help install Exited with code 1``”
+> Remember to have pip and python 3.12 installed if you get an error like this ``python3.12 -m pip help install Exited with code 1``”
 
 > [!NOTE]
 > Unfortunately in version 4 of serverless framework is asking to log in their page once you want to deploy the architecture, so it is necessary to create an account on this platform to see the architecture running, or [run it in version 3](https://www.serverless.com/framework/docs/getting-started#pinning-to-a-specific-version).
@@ -104,7 +104,7 @@ Using the ``script.py`` file can be used to perform the respective tests to the 
 
 3. Enter username and a 6-character password.
 
-<img src=“image/CreateUserInfo.png”  width=“600px”>
+<img src="image/CreateUserInfo.png" width=“600px”>
 
 4. Once created, go to the AppIntegration tab.
 
