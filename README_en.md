@@ -41,6 +41,7 @@ This table contains information about products, such as ID and name, and also in
 ## Theoretical Questions
 The company projects a 500% expansion in its operations over the next year and a doubling of that in the second year. 
 ### What recommendations would you give to ensure their operations?
+
 ### Is the proposed solution capable of meeting the demand over the next two years?
 
 ## Deployment tutorial
