@@ -1,6 +1,6 @@
 # Serverless REST API with Flask, DynamoDB, and DynamoDB Streams
 A REST service to handle order requests for the company Cargo Express using the [serverless framework](https://github.com/serverless/serverless), which is a tool for building and deploying serverless applications using Infrastructure as Code (IaC). This document covers all technical aspects, including architectural design, data modeling, and includes a tutorial for the proper deployment of the service.
-
+> There is an English version of this document, you can find it at [README.md](./README.md)
 ## Contents
 - [Architectural Model](#architectural-model)
 - [Data Model](#data-model)
@@ -145,6 +145,3 @@ Using the ``script.py`` file can be used to perform the respective tests to the 
 ![alt text](image/Postman.png)
 
 15. In DynamoDB in the AWS console in the tables option, you can view the order, product and deliveries records.
-
-
-Translated with DeepL.com (free version)

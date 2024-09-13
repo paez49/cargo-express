@@ -1,7 +1,7 @@
 # Serverless REST API con Flask, DynamoDB y DynamoDB Streams
 Servicio REST para recibir peticiones de pedidos para la empresa Cargo Express usando [serverless framework](https://github.com/serverless/serverless), siendo esta una herramienta para la construcción y despliegue de aplicaciones serverless usando el marco de trabajo de IaC. En este documento se van a ver todos los aspectos tecnicos, incluyendo diseño 
 de arquitectura, modelamiento de datos, además de incluir un tutorial para el correcto despliegue del servicio.
-
+> Hay una versión en ingles de este documento, la puedes encontrar como [README_en.md](./README_en.md)
 ## Contenido
 - [Modelo de arquitectura](#modelo-de-arquitectura)
 - [Modelo de datos](#modelo-de-datos)
