@@ -25,7 +25,7 @@ As seen in the image, the entry point is through the API Gateway, which redirect
 
 ## Data Model
 
-<img src="image/ModeloDatos.png" alt="SVG Description" width="600px">
+<img src="image/ModeloDatos.png"  width="600px">
 
 > As evidenced, there are attributes that repeat across tables. This was done to simplify database queries, but if storage efficiency is a concern, normalization would be required.
 
@@ -71,7 +71,7 @@ sls deploy
 > [!WARNING]
 > Remember to have pip and python 3.12 installed if you get an error like this ```python3.12 -m pip help install Exited with code 1``”
 
-> [!INFO]
+> [!NOTE]
 > Unfortunately in version 4 of serverless framework is asking to log in their page once you want to deploy the architecture, so it is necessary to create an account on this platform to see the architecture running, or [run it in version 3](https://www.serverless.com/framework/docs/getting-started#pinning-to-a-specific-version).
 
 > To be able to deploy the architecture it is necessary to [have the AWS CLI functional](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), as well as [have the AWS CLI functional](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), as well as to 
