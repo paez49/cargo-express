@@ -75,7 +75,7 @@ sls deploy
 > [!WARNING]
 > Recuerda tener instalado pip y python 3.12 si te llegar a salir un error como este "`python3.12 -m pip help install Exited with code 1`"
 
-> [!INFO]
+> [!NOTE]
 > Lastimosamente en la versión 4 de serverless framework está pidiendo loguearse en la pagina de ellos una vez que se quiere desplegar la arquitectura, por lo tanto es necesario crearse una cuenta en esta plataforma para poder ver en ejecución la arquitectura, o  [ejecutarlo en la versión 3](https://www.serverless.com/framework/docs/getting-started#pinning-to-a-specific-version).
 
 > Para poder desplegar la arquitectura es necesario [tener funcional el CLI de AWS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), así como de 
