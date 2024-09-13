@@ -145,3 +145,5 @@ Using the ``script.py`` file can be used to perform the respective tests to the 
 ![alt text](image/Postman.png)
 
 15. In DynamoDB in the AWS console in the tables option, you can view the order, product and deliveries records.
+
+![alt text](image/ExecutionResult.png)
