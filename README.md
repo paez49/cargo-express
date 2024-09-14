@@ -155,7 +155,7 @@ Usando el archivo `script.py` se puede usar para realizar las respectivas prueba
 
 ![alt text](image/DOTENV.png)
 
-10. En la variable `API` pon la URL raíz que te salió una vez desplegada la arquitectura.
+10. En la variable `API` pon la URL sin rutas que te salió una vez desplegada la arquitectura con `sls deploy`.
 
 11. En la variable `CLIENT_ID` pon el id del app client **entre comillas**, este se encuentra en la interfaz vista en el paso 5.
 
@@ -169,7 +169,7 @@ Usando el archivo `script.py` se puede usar para realizar las respectivas prueba
 
 ![alt text](image/Credentials.png)
 
-14. Ahora puedes ejecutar el `script.py` para ver el servicio funcionando. En la consola se imprimirá el access token, además mostrará como se crean 3 productos. Usando Postman y el token anteriormente impreso, puedes usar el endpoint `/monitor/`.
+14. Ahora puedes ejecutar el `script.py` para ver el servicio en funcionamiento. En la consola se imprimirá el access token, además mostrará como se crean 3 productos y presentará información relacionada con el monitoreo del servicio. Usando Postman y el token anteriormente impreso, puedes usar el endpoint `/monitor/`.
 
 ![alt text](image/Postman.png)
 

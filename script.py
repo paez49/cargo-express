@@ -84,7 +84,6 @@ order_api = api_url + "/order"
 monitor_api = api_url + "/monitor"
 
 
-# TODO: Update credentials when testing
 user = os.getenv("USERNAME")
 password = os.getenv("PASSWORD")
 
